@@ -1,27 +1,33 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import './LocationsList.css'
 
 const LocationsList = ({setActive,ip}) => {
-  const [data, setData] = useState([])
+  const [data, setData] = useState(undefined)
   const [error, setError] = useState(false)
+  const isMount = useRef(true)
 
   useEffect(()=>{
-      fetch('https://dev-sso.transparenterra.com/api/location-list')
-        .then((response) => {
-          if(response.status === 404){
-            setError(true)
-          } else if (response.status === 200){
-          return response.json();
-          }
-        })
-        .then((data) => {
-          let myDataIp = data.data.filter(el=>el.ip === ip)
-          setData(myDataIp);
-        }).catch(err=> console.log(err))
+   if (isMount.current ) {
+     isMount.current = false
+     fetch('https://dev-sso.transparenterra.com/api/location-list')
+       .then((response) => {
+         if (response.status === 404) {
+           setError(true)
+         } else if (response.status === 200) {
+         }
+         return response.json();
+       })
+       .then((data) => {
+         let myDataIp = data.data.filter(el => el.ip === ip.ip)
+         setData(myDataIp);
+       })
+       .catch(err => console.log(err))
+   }
   },[])
 
   return (
     <div>
+      {(!error && !data) && <h2>Loading...</h2>}
       {error &&<> <div className="header-modal">
         <h3 className="title">Error</h3>
         <span className="cross" onClick={()=>setActive(false)}>&#10006;</span>
@@ -29,9 +35,9 @@ const LocationsList = ({setActive,ip}) => {
       <p>Something went wrong try again</p>
       </>
       }
-      {!error && <>
+      { (!error && data) && <>
         <div className='header-modal'>
-          <h3 className='title'>List of locations</h3>
+          <h2 className='title'>List of locations</h2>
           <span className='cross' onClick={()=>setActive(false)}>&#10006;</span>
         </div>
       <table>
@@ -49,7 +55,8 @@ const LocationsList = ({setActive,ip}) => {
         </tr>
         </thead>
         <tbody>
-        {data?.map(el=>{
+        {data?.length === 0 && <p>There is no data</p>}
+        {data?.length > 0 && data?.map(el=>{
           return <tr key={el.id}>
             <th>
               {el.ip}

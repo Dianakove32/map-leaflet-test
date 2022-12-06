@@ -1,20 +1,16 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import Modal from '../Modal/Modal';
 import MapComponent from '../Map/Map';
+import {fetchMainData} from '../../api';
 import LocationsList from '../LocationsList/LocationsList';
+
+const resource = fetchMainData()
 
 const MainPage = () => {
   const [isModalLocations, setIsModalLocations] = useState(false)
   const [showModal, setShowModal] = useState(false);
-  const [ip, setIp] = useState()
 
-  useEffect(()=>{
-    fetch('https://api.ipify.org?format=json')
-      .then((response) => response.json())
-      .then((data) => {
-        setIp(data.ip)
-      }).catch(err=>console.log(err))
-  },[])
+  const ip = resource.id.read()
 
   return (
     <div className='App'>
